@@ -13,7 +13,7 @@
 
         body {
             overflow: hidden;
-            background: #0a0a0f;
+            background: #050505;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
@@ -43,9 +43,9 @@
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.3rem;
-            text-shadow: 0 0 20px rgba(0, 200, 255, 0.5),
-                         0 0 40px rgba(255, 0, 100, 0.3);
-            opacity: 0.9;
+            text-shadow: 0 0 20px rgba(100, 200, 255, 0.4),
+                         0 0 40px rgba(255, 100, 150, 0.3);
+            opacity: 0.95;
         }
     </style>
 </head>
@@ -57,7 +57,6 @@
     </div>
 
     <script>
-        // Configuration
         const canvas = document.getElementById('heroCanvas');
         const ctx = canvas.getContext('2d');
 
@@ -65,171 +64,186 @@
         let time = 0;
         const binaryColumns = [];
 
+        // Resize canvas
+        function resizeCanvas() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            initBinaryRain();
+        }
+
         // Binary Rain Configuration
         function initBinaryRain() {
             binaryColumns.length = 0;
-            const columnCount = Math.floor(width / 15);
+            const columnCount = Math.floor(width / 18);
 
             for (let i = 0; i < columnCount; i++) {
-                // Déterminer la couleur en fonction de la position horizontale
-                let color;
                 const posRatio = i / columnCount;
-                if (posRatio < 0.35) {
-                    color = 'cyan'; // Zone bleue à gauche
-                } else if (posRatio > 0.65) {
-                    color = 'red'; // Zone rouge à droite
+                let color;
+
+                // Distribution des couleurs selon position
+                if (posRatio < 0.4) {
+                    color = 'cyan';
+                } else if (posRatio > 0.6) {
+                    color = 'red';
                 } else {
-                    color = Math.random() > 0.5 ? 'cyan' : 'red'; // Zone mixte au centre
+                    color = Math.random() > 0.5 ? 'cyan' : 'red';
                 }
 
                 binaryColumns.push({
-                    x: i * 15,
+                    x: i * 18,
                     y: Math.random() * height * 2 - height,
-                    speed: 0.8 + Math.random() * 1.5,
+                    speed: 0.5 + Math.random() * 1.2,
                     chars: [],
-                    opacity: 0.2 + Math.random() * 0.5,
+                    opacity: 0.15 + Math.random() * 0.35,
                     color: color
                 });
 
-                // Initialize character chain (plus longues)
-                const chainLength = 20 + Math.floor(Math.random() * 15);
+                // Chaînes de binaires
+                const chainLength = 25 + Math.floor(Math.random() * 20);
                 for (let j = 0; j < chainLength; j++) {
                     binaryColumns[i].chars.push(Math.random() > 0.5 ? '1' : '0');
                 }
             }
         }
 
-        // Resize canvas
-        function resizeCanvas() {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-            initBinaryRain(); // Réinitialiser les colonnes après resize
-        }
-
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
 
-        // Film Grain Effect - Plus subtil
+        // Film Grain Effect
         function drawFilmGrain() {
-            const grainDensity = 0.03; // Réduit la densité du grain
+            const grainDensity = 0.015;
             const imageData = ctx.createImageData(width, height);
             const data = imageData.data;
 
             for (let i = 0; i < data.length; i += 4) {
                 if (Math.random() < grainDensity) {
-                    const noise = Math.random() * 30;
-                    data[i] = noise;     // R
-                    data[i + 1] = noise; // G
-                    data[i + 2] = noise; // B
-                    data[i + 3] = 20;    // A (low opacity)
+                    const noise = Math.random() * 40;
+                    data[i] = noise;
+                    data[i + 1] = noise;
+                    data[i + 2] = noise;
+                    data[i + 3] = 25;
                 }
             }
 
             ctx.putImageData(imageData, 0, 0);
         }
 
-        // Pulsing Orbs (Glows)
+        // Orbs massives comme dans l'image
         function drawOrbs() {
-            // Left Cyan/Blue Orb - Plus grande et intense
-            const leftPulse = 0.85 + Math.sin(time * 0.0008) * 0.15;
-            const leftRadius = Math.max(width, height) * 0.7 * leftPulse;
+            const maxDim = Math.max(width, height);
+
+            // Orb BLEUE gauche - Énorme et diffuse
+            const leftPulse = 0.88 + Math.sin(time * 0.0006) * 0.12;
+            const leftRadius = maxDim * 1.2 * leftPulse;
+
             const leftGradient = ctx.createRadialGradient(
-                width * 0.15, height * 0.5, 0,
-                width * 0.15, height * 0.5, leftRadius
+                width * 0.12, height * 0.5, 0,
+                width * 0.12, height * 0.5, leftRadius
             );
-            leftGradient.addColorStop(0, 'rgba(20, 150, 255, ' + (0.5 * leftPulse) + ')');
-            leftGradient.addColorStop(0.2, 'rgba(10, 120, 230, ' + (0.35 * leftPulse) + ')');
-            leftGradient.addColorStop(0.4, 'rgba(5, 80, 180, ' + (0.2 * leftPulse) + ')');
-            leftGradient.addColorStop(0.7, 'rgba(0, 40, 120, ' + (0.05 * leftPulse) + ')');
+
+            leftGradient.addColorStop(0, 'rgba(30, 140, 255, 0.65)');
+            leftGradient.addColorStop(0.15, 'rgba(25, 120, 240, 0.50)');
+            leftGradient.addColorStop(0.3, 'rgba(20, 100, 220, 0.35)');
+            leftGradient.addColorStop(0.5, 'rgba(10, 70, 180, 0.18)');
+            leftGradient.addColorStop(0.7, 'rgba(5, 40, 120, 0.06)');
             leftGradient.addColorStop(1, 'rgba(0, 20, 60, 0)');
 
+            ctx.globalCompositeOperation = 'screen';
             ctx.fillStyle = leftGradient;
             ctx.fillRect(0, 0, width, height);
 
-            // Right Red/Magenta Orb - Plus grande et intense
-            const rightPulse = 0.85 + Math.sin(time * 0.001 + Math.PI * 0.6) * 0.15;
-            const rightRadius = Math.max(width, height) * 0.75 * rightPulse;
+            // Orb ROUGE droite - Énorme et diffuse
+            const rightPulse = 0.88 + Math.sin(time * 0.0007 + Math.PI * 0.5) * 0.12;
+            const rightRadius = maxDim * 1.25 * rightPulse;
+
             const rightGradient = ctx.createRadialGradient(
-                width * 0.85, height * 0.5, 0,
-                width * 0.85, height * 0.5, rightRadius
+                width * 0.88, height * 0.5, 0,
+                width * 0.88, height * 0.5, rightRadius
             );
-            rightGradient.addColorStop(0, 'rgba(255, 30, 100, ' + (0.5 * rightPulse) + ')');
-            rightGradient.addColorStop(0.2, 'rgba(220, 20, 80, ' + (0.35 * rightPulse) + ')');
-            rightGradient.addColorStop(0.4, 'rgba(180, 10, 60, ' + (0.2 * rightPulse) + ')');
-            rightGradient.addColorStop(0.7, 'rgba(120, 5, 40, ' + (0.05 * rightPulse) + ')');
+
+            rightGradient.addColorStop(0, 'rgba(255, 40, 100, 0.65)');
+            rightGradient.addColorStop(0.15, 'rgba(240, 30, 90, 0.50)');
+            rightGradient.addColorStop(0.3, 'rgba(220, 20, 80, 0.35)');
+            rightGradient.addColorStop(0.5, 'rgba(180, 10, 60, 0.18)');
+            rightGradient.addColorStop(0.7, 'rgba(120, 5, 40, 0.06)');
             rightGradient.addColorStop(1, 'rgba(60, 0, 20, 0)');
 
             ctx.fillStyle = rightGradient;
             ctx.fillRect(0, 0, width, height);
+
+            ctx.globalCompositeOperation = 'source-over';
         }
 
         // Binary Rain
         function drawBinaryRain() {
-            ctx.font = '12px "Courier New", monospace';
+            ctx.font = '11px "Courier New", monospace';
+            ctx.globalAlpha = 1;
 
             for (let i = 0; i < binaryColumns.length; i++) {
                 const col = binaryColumns[i];
 
-                // Update position
                 col.y += col.speed;
-                if (col.y > height + 500) {
-                    col.y = -500;
-                    col.speed = 0.8 + Math.random() * 1.5;
-                    col.opacity = 0.2 + Math.random() * 0.5;
+                if (col.y > height + 600) {
+                    col.y = -600;
+                    col.speed = 0.5 + Math.random() * 1.2;
+                    col.opacity = 0.15 + Math.random() * 0.35;
                 }
 
-                // Occasionally change binary values
-                if (Math.random() > 0.96) {
+                // Mutation occasionnelle
+                if (Math.random() > 0.97) {
                     const idx = Math.floor(Math.random() * col.chars.length);
                     col.chars[idx] = Math.random() > 0.5 ? '1' : '0';
                 }
 
-                // Draw character chain
+                // Dessiner la chaîne
                 for (let j = 0; j < col.chars.length; j++) {
-                    const y = col.y + j * 18;
+                    const y = col.y + j * 16;
+                    if (y < -20 || y > height + 20) continue;
+
                     const fadeOut = 1 - (j / col.chars.length);
-                    const finalOpacity = col.opacity * fadeOut * 0.8;
+                    const finalOpacity = col.opacity * fadeOut * 0.7;
 
-                    // Color based on column color with more vibrance
                     if (col.color === 'cyan') {
-                        ctx.fillStyle = 'rgba(50, 180, 255, ' + finalOpacity + ')';
+                        ctx.fillStyle = `rgba(80, 200, 255, ${finalOpacity})`;
+                        if (j < 2) {
+                            ctx.shadowBlur = 6;
+                            ctx.shadowColor = 'rgba(80, 200, 255, 0.5)';
+                        }
                     } else {
-                        ctx.fillStyle = 'rgba(255, 70, 140, ' + finalOpacity + ')';
-                    }
-
-                    // Glow effect on head of chain (premiers 3 caractères)
-                    if (j < 3) {
-                        ctx.shadowBlur = 8 - (j * 2);
-                        ctx.shadowColor = col.color === 'cyan' ? 'rgba(50, 180, 255, 0.6)' : 'rgba(255, 70, 140, 0.6)';
-                    } else {
-                        ctx.shadowBlur = 0;
+                        ctx.fillStyle = `rgba(255, 80, 150, ${finalOpacity})`;
+                        if (j < 2) {
+                            ctx.shadowBlur = 6;
+                            ctx.shadowColor = 'rgba(255, 80, 150, 0.5)';
+                        }
                     }
 
                     ctx.fillText(col.chars[j], col.x, y);
+
+                    if (j < 2) {
+                        ctx.shadowBlur = 0;
+                    }
                 }
             }
 
+            ctx.globalAlpha = 1;
             ctx.shadowBlur = 0;
         }
 
-        // Main Animation Loop
+        // Animation Loop
         function animate() {
-            // Clear canvas with dark background
-            ctx.fillStyle = '#0a0a0f';
+            // Fond noir profond
+            ctx.fillStyle = '#050505';
             ctx.fillRect(0, 0, width, height);
 
-            // Draw layers in order
+            // Dessiner les couches
             drawOrbs();
             drawBinaryRain();
             drawFilmGrain();
 
-            // Update time
             time++;
-
             requestAnimationFrame(animate);
         }
 
-        // Start animation
         animate();
     </script>
 </body>
