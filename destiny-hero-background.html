@@ -63,22 +63,13 @@
 
         let width, height;
         let time = 0;
-
-        // Resize canvas
-        function resizeCanvas() {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-        }
-
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
+        const binaryColumns = [];
 
         // Binary Rain Configuration
-        const binaryColumns = [];
-        const columnCount = Math.floor(width / 15); // Plus dense
-
         function initBinaryRain() {
             binaryColumns.length = 0;
+            const columnCount = Math.floor(width / 15);
+
             for (let i = 0; i < columnCount; i++) {
                 // Déterminer la couleur en fonction de la position horizontale
                 let color;
@@ -108,7 +99,15 @@
             }
         }
 
-        initBinaryRain();
+        // Resize canvas
+        function resizeCanvas() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            initBinaryRain(); // Réinitialiser les colonnes après resize
+        }
+
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
 
         // Film Grain Effect - Plus subtil
         function drawFilmGrain() {
