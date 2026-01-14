@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Destiny Hero Background</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            overflow: hidden;
+            background: #050505;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        #heroCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            color: #fff;
+            text-align: center;
+            pointer-events: none;
+        }
+
+        .hero-title {
+            font-size: 4rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3rem;
+            text-shadow: 0 0 20px rgba(0, 200, 255, 0.5),
+                         0 0 40px rgba(255, 0, 100, 0.3);
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="heroCanvas"></canvas>
+
+    <div class="hero-content">
+        <h1 class="hero-title">Destiny Awaits</h1>
+    </div>
+
+    <script>
+        // Configuration
+        const canvas = document.getElementById('heroCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+        let time = 0;
+
+        // Resize canvas
+        function resizeCanvas() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Binary Rain Configuration
+        const binaryColumns = [];
+        const columnCount = Math.floor(width / 20);
+
+        function initBinaryRain() {
+            binaryColumns.length = 0;
+            for (let i = 0; i < columnCount; i++) {
+                binaryColumns.push({
+                    x: i * 20,
+                    y: Math.random() * height,
+                    speed: 1 + Math.random() * 2,
+                    chars: [],
+                    opacity: 0.3 + Math.random() * 0.4,
+                    color: Math.random() > 0.5 ? 'cyan' : 'red'
+                });
+
+                // Initialize character chain
+                for (let j = 0; j < 15; j++) {
+                    binaryColumns[i].chars.push(Math.random() > 0.5 ? '1' : '0');
+                }
+            }
+        }
+
+        initBinaryRain();
+
+        // Film Grain Effect
+        function drawFilmGrain() {
+            const imageData = ctx.createImageData(width, height);
+            const data = imageData.data;
+
+            for (let i = 0; i < data.length; i += 4) {
+                const noise = Math.random() * 25;
+                data[i] = noise;     // R
+                data[i + 1] = noise; // G
+                data[i + 2] = noise; // B
+                data[i + 3] = 15;    // A (low opacity)
+            }
+
+            ctx.putImageData(imageData, 0, 0);
+        }
+
+        // Pulsing Orbs (Glows)
+        function drawOrbs() {
+            // Left Cyan/Blue Orb
+            const leftPulse = 0.8 + Math.sin(time * 0.001) * 0.2;
+            const leftRadius = 400 * leftPulse;
+            const leftGradient = ctx.createRadialGradient(
+                width * 0.2, height * 0.5, 0,
+                width * 0.2, height * 0.5, leftRadius
+            );
+            leftGradient.addColorStop(0, 'rgba(0, 200, 255, ' + (0.3 * leftPulse) + ')');
+            leftGradient.addColorStop(0.3, 'rgba(0, 150, 255, ' + (0.15 * leftPulse) + ')');
+            leftGradient.addColorStop(0.6, 'rgba(0, 100, 200, ' + (0.05 * leftPulse) + ')');
+            leftGradient.addColorStop(1, 'rgba(0, 50, 150, 0)');
+
+            ctx.fillStyle = leftGradient;
+            ctx.fillRect(0, 0, width, height);
+
+            // Right Red/Magenta Orb
+            const rightPulse = 0.8 + Math.sin(time * 0.0012 + Math.PI) * 0.2;
+            const rightRadius = 450 * rightPulse;
+            const rightGradient = ctx.createRadialGradient(
+                width * 0.8, height * 0.5, 0,
+                width * 0.8, height * 0.5, rightRadius
+            );
+            rightGradient.addColorStop(0, 'rgba(255, 0, 100, ' + (0.3 * rightPulse) + ')');
+            rightGradient.addColorStop(0.3, 'rgba(200, 0, 80, ' + (0.15 * rightPulse) + ')');
+            rightGradient.addColorStop(0.6, 'rgba(150, 0, 60, ' + (0.05 * rightPulse) + ')');
+            rightGradient.addColorStop(1, 'rgba(100, 0, 40, 0)');
+
+            ctx.fillStyle = rightGradient;
+            ctx.fillRect(0, 0, width, height);
+        }
+
+        // Binary Rain
+        function drawBinaryRain() {
+            ctx.font = '14px "Courier New", monospace';
+
+            for (let i = 0; i < binaryColumns.length; i++) {
+                const col = binaryColumns[i];
+
+                // Update position
+                col.y += col.speed;
+                if (col.y > height + 300) {
+                    col.y = -300;
+                    col.speed = 1 + Math.random() * 2;
+                    col.opacity = 0.3 + Math.random() * 0.4;
+                }
+
+                // Occasionally change binary values
+                if (Math.random() > 0.95) {
+                    const idx = Math.floor(Math.random() * col.chars.length);
+                    col.chars[idx] = Math.random() > 0.5 ? '1' : '0';
+                }
+
+                // Draw character chain
+                for (let j = 0; j < col.chars.length; j++) {
+                    const y = col.y + j * 20;
+                    const fadeOut = 1 - (j / col.chars.length);
+
+                    // Color based on column color
+                    if (col.color === 'cyan') {
+                        ctx.fillStyle = 'rgba(0, 200, 255, ' + (col.opacity * fadeOut) + ')';
+                    } else {
+                        ctx.fillStyle = 'rgba(255, 50, 120, ' + (col.opacity * fadeOut) + ')';
+                    }
+
+                    // Glow effect on first char
+                    if (j === 0) {
+                        ctx.shadowBlur = 10;
+                        ctx.shadowColor = col.color === 'cyan' ? '#00c8ff' : '#ff3278';
+                    } else {
+                        ctx.shadowBlur = 0;
+                    }
+
+                    ctx.fillText(col.chars[j], col.x, y);
+                }
+            }
+
+            ctx.shadowBlur = 0;
+        }
+
+        // Main Animation Loop
+        function animate() {
+            // Clear canvas with dark background
+            ctx.fillStyle = '#050505';
+            ctx.fillRect(0, 0, width, height);
+
+            // Draw layers in order
+            drawOrbs();
+            drawBinaryRain();
+            drawFilmGrain();
+
+            // Update time
+            time++;
+
+            requestAnimationFrame(animate);
+        }
+
+        // Start animation
+        animate();
+    </script>
+</body>
+</html>
